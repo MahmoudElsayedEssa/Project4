@@ -93,7 +93,9 @@ class RemindersActivityTest :
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
         binding.monitorActivity(activityScenario)
 
+        // click on add new reminder fab
         onView(withId(R.id.addReminderFAB)).perform(click())
+        // click on save new reminder fab
         onView(withId(R.id.saveReminder)).perform(click())
 
         val snackBarMessage = appContext.getString(R.string.err_enter_title)
@@ -104,18 +106,28 @@ class RemindersActivityTest :
 
     @Test
     fun testReminderSavedToastMessage() {
+        //start scenario
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
         binding.monitorActivity(activityScenario)
 
+        // click on add new reminder fab
         onView(withId(R.id.addReminderFAB)).perform(click())
 
+        // add new title
         onView(withId(R.id.reminderTitle)).perform(ViewActions.replaceText("Title"))
+        // add new Description
         onView(withId(R.id.reminderDescription)).perform(ViewActions.replaceText("Description"))
+        // click on select reminder location
         onView(withId(R.id.selectLocation)).perform(click())
+        // click on the mapLocation
+        Thread.sleep(2000)
+        onView(withId(R.id.map)).perform(ViewActions.longClick())
+        // click on confirm button
         onView(withId(R.id.button)).perform(click())
-
+        // click on save button
         onView(withId(R.id.saveReminder)).perform(click())
 
+        // check if success toast appears
         onView(withText(R.string.reminder_saved)).inRoot(
             withDecorView(
                 not(
@@ -127,7 +139,7 @@ class RemindersActivityTest :
                 )
             )
         ).check(matches(isDisplayed()))
-
+        //end scenario
         activityScenario.close()
     }
 

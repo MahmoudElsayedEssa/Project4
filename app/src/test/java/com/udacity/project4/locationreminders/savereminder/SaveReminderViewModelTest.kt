@@ -39,6 +39,7 @@ class SaveReminderViewModelTest: KoinComponent{
 
     @Before
     fun setup() {
+        //make fake data source and the view model
         fakeReminderDataSource = FakeDataSource()
         saveReminderViewModel = SaveReminderViewModel(
             ApplicationProvider.getApplicationContext(),

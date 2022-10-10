@@ -89,6 +89,7 @@ dependencies {
     implementation "androidx.room:room-runtime:2.5.0-alpha03"
     testImplementation project(path: ':app')
     androidTestImplementation project(path: ':app')
+    androidTestImplementation project(path: ':app')
     kapt "androidx.room:room-compiler:2.5.0-alpha02"
 
     //Coroutines Dependencies

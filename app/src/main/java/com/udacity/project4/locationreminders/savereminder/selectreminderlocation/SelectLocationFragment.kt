@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -35,6 +36,10 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
     private var marker: Marker? = null
+
+    companion object {
+        const val REQUEST_LOCATION_PERMISSION = 1010
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -118,45 +123,65 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             )
         }
 
+//        permissionSetup()
+        askForPermissionAndGetCurrentLocation()
+
+    }
+
+    private fun askForPermissionAndGetCurrentLocation() {
         if (ContextCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
+                requireActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
 
             enableMapMyLocation()
-
         } else {
-
-//            requestPermissions(
-//                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-//                FINE_LOCATION_PERMISSION_REQUEST_CODE
-//            )
-            permissionSetup()
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                REQUEST_LOCATION_PERMISSION
+            )
         }
     }
 
-    private fun permissionSetup() {
-        val permission = ContextCompat.checkSelfPermission(
-            requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
-        )
+    // onRequestPermissionsResult() is deprecated and this the new way
+    //https://stackoverflow.com/questions/66551781/android-onrequestpermissionsresult-is-deprecated-are-there-any-alternatives
+//    private fun permissionSetup() {
+//        val permission = ContextCompat.checkSelfPermission(
+//            requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
+//        )
+//
+//        if (permission != PackageManager.PERMISSION_GRANTED) {
+//            permissionsResultCallback.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+//        } else {
+//            println("Permission isGranted")
+//        }
+//    }
+//
+//    private val permissionsResultCallback = registerForActivityResult(
+//        ActivityResultContracts.RequestPermission()
+//    ) {
+//        when (it) {
+//            true -> {
+//                println("Permission has been granted by user")
+//                enableMapMyLocation()
+//            }
+//            false -> {
+//                _viewModel.showSnackBarInt.value = R.string.permission_denied_explanation
+//            }
+//        }
+//    }
 
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            permissionsResultCallback.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        } else {
-            println("Permission isGranted")
-        }
-    }
-
-    private val permissionsResultCallback = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
+    @Deprecated("Deprecated in Java")
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
     ) {
-        when (it) {
-            true -> {
-                println("Permission has been granted by user")
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            if (grantResults.isNotEmpty() && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                 enableMapMyLocation()
-            }
-            false -> {
-                _viewModel.showSnackBarInt.value = R.string.permission_denied_explanation
             }
         }
     }
@@ -195,23 +220,25 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             LocationServices.getFusedLocationProviderClient(requireContext())
         val lastLocationTask = fusedLocationProviderClient.lastLocation
 
-        lastLocationTask.addOnCompleteListener(requireActivity()) { task ->
-
-            if (task.isSuccessful) {
-                val taskResult = task.result
-                taskResult?.run {
-
-                    val latLng = LatLng(latitude, longitude)
-                    map.moveCamera(
+        lastLocationTask.addOnSuccessListener { location ->
+            location?.let {
+                val latLng = LatLng(location.latitude, location.longitude)
+                map.apply {
+                    moveCamera(
                         CameraUpdateFactory.newLatLngZoom(
                             latLng, 15f
                         )
                     )
-
-                    addMapMarker(latLng)
+                    addMarker(
+                        MarkerOptions()
+                            .position(latLng)
+                            .title(getString(R.string.my_current_location))
+                    )
                 }
+
             }
         }
+
     }
 
 }

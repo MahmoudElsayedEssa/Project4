@@ -3,8 +3,11 @@ package com.udacity.project4.locationreminders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.LocationServices
 import com.udacity.project4.R
 import com.udacity.project4.databinding.ActivityReminderDescriptionBinding
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
@@ -23,6 +26,8 @@ class ReminderDescriptionActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityReminderDescriptionBinding
+    private lateinit var geoFencingClient: GeofencingClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(
@@ -30,9 +35,28 @@ class ReminderDescriptionActivity : AppCompatActivity() {
             R.layout.activity_reminder_description
         )
 
-        val reminderDataItem =
-            this.intent.getSerializableExtra(EXTRA_ReminderDataItem) as ReminderDataItem
-        binding.reminderDataItem = reminderDataItem
+        val reminderItemDescription =
+            intent.getSerializableExtra(EXTRA_ReminderDataItem) as ReminderDataItem
+        geoFencingClient = LocationServices.getGeofencingClient(this)
+
+        binding.reminderDataItem = reminderItemDescription
+        geoFencingClient.removeGeofences(listOf(reminderItemDescription.id)).run {
+            addOnCompleteListener {
+                if (it.isSuccessful) {
+                    Toast.makeText(
+                        this@ReminderDescriptionActivity,
+                        "reminder item has been deleted",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    Toast.makeText(
+                        this@ReminderDescriptionActivity,
+                        "there is an issue and the reminder item hasn't been deleted",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
     }
 
 }

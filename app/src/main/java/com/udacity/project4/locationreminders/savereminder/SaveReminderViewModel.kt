@@ -31,11 +31,11 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
     }
 
 
-//    fun validateAndSaveReminder(reminderData: ReminderDataItem) {
-//        if (validateEnteredData(reminderData)) {
-//            saveReminder(reminderData)
-//        }
-//    }
+    fun validateAndSaveReminder(reminderData: ReminderDataItem) {
+        if (validateEnteredData(reminderData)) {
+            saveReminder(reminderData)
+        }
+    }
 
 
     fun saveReminder(reminderData: ReminderDataItem) {

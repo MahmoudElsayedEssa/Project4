@@ -17,7 +17,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-// TODO: Add testing implementation to the RemindersLocalRepository.kt
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)

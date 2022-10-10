@@ -12,6 +12,7 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.R
+import com.udacity.project4.databinding.ActivityAuthenticationBinding
 import com.udacity.project4.locationreminders.RemindersActivity
 
 
@@ -24,9 +25,16 @@ class AuthenticationActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<LoginViewModel>()
 
+    private var _binding: ActivityAuthenticationBinding? = null
+    val binding: ActivityAuthenticationBinding
+        get() = _binding!!
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_authentication)
+
+        _binding = ActivityAuthenticationBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         viewModel.authenticationState.observe(this) { authenticationState ->
             when (authenticationState) {
@@ -45,12 +53,19 @@ class AuthenticationActivity : AppCompatActivity() {
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
+
+
     fun onLoginClick(view: View) {
         launchSignInFlow()
     }
 
     private fun launchSignInFlow() {
 
+        // Choose authentication providers
         val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build(),
             AuthUI.IdpConfig.GoogleBuilder().build()
@@ -61,7 +76,8 @@ class AuthenticationActivity : AppCompatActivity() {
 
     private fun openSomeActivityForResult(providers: ArrayList<AuthUI.IdpConfig>) {
         val intent =
-            AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers)
+            AuthUI.getInstance().createSignInIntentBuilder()
+                .setAvailableProviders(providers)
                 .build()
         resultLauncher.launch(intent)
     }

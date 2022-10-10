@@ -26,6 +26,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.P])
 class RemindersListViewModelTest : KoinComponent {
 
+
     private lateinit var fakeReminderDataSource: FakeDataSource
     private lateinit var remindersViewModel: RemindersListViewModel
 
