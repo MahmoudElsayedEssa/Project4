@@ -200,6 +200,7 @@ class SaveReminderFragment : BaseFragment() {
                 }
             }
 
+
         } else {
             ActivityCompat.requestPermissions(
                 requireActivity(),
