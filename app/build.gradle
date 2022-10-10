@@ -85,6 +85,7 @@ dependencies {
     implementation "androidx.test.espresso:espresso-idling-resource:3.4.0"
 
     //Room dependencies
+
     implementation "androidx.room:room-ktx:2.5.0-alpha03"
     implementation "androidx.room:room-runtime:2.5.0-alpha03"
     testImplementation project(path: ':app')

@@ -41,40 +41,40 @@ import org.koin.test.get
 class RemindersActivityTest :
     AutoCloseKoinTest() {// Extended Koin Test - embed auto close @after method to close Koin after every test
 
-    private lateinit var reminderDataSource: ReminderDataSource
+    private lateinit var repository: ReminderDataSource
     private lateinit var appContext: Application
     private val binding = DataBindingIdlingResource()
 
     @Before
     fun init() {
-        stopKoin() // stop the original app koin
+        stopKoin()//stop the original app koin
         appContext = getApplicationContext()
         val myModule = module {
             viewModel {
                 RemindersListViewModel(
-                    appContext, get() as ReminderDataSource
+                    appContext,
+                    get() as ReminderDataSource
                 )
             }
             single {
                 SaveReminderViewModel(
-                    appContext, get() as ReminderDataSource
+                    appContext,
+                    get() as ReminderDataSource
                 )
             }
-            single { RemindersLocalRepository(get()) }
+            single { RemindersLocalRepository(get()) as ReminderDataSource }
             single { LocalDB.createRemindersDao(appContext) }
         }
-
-        // declare a new koin module
+        //declare a new koin module
         startKoin {
             modules(listOf(myModule))
         }
+        //Get our real repository
+        repository = get()
 
-        // Get our real repository
-        reminderDataSource = get()
-
-        // clear the data to start fresh
+        //clear the data to start fresh
         runBlocking {
-            reminderDataSource.deleteAllReminders()
+            repository.deleteAllReminders()
         }
     }
 
