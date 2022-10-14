@@ -186,7 +186,7 @@ class SaveReminderFragment : BaseFragment() {
                     ).show()
 
                     _viewModel.saveReminder(reminderDataItem)
-                    Log.e("Add Geofence", geofence.requestId)
+                    Log.e("TAG", geofence.requestId)
                 }
 
                 addOnFailureListener {

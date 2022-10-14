@@ -2,6 +2,9 @@ package com.udacity.project4.locationreminders.geofence
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.JobIntentService
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
@@ -35,6 +38,7 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
 
     // handle the geofencing transition events and
     // send a notification to the user when he enters the geofence area
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onHandleWork(intent: Intent) {
 
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
@@ -42,17 +46,18 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
             if (geofencingEvent .hasError()) {
                 return
             }
-        }
-
-        if (geofencingEvent != null) {
             if (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 if (geofencingEvent.triggeringGeofences!!.isNotEmpty()) {
                     sendNotification(geofencingEvent.triggeringGeofences!!)
                 }
             }
         }
+
+        else
+            Log.i("TAG", "onHandleWork:geofencingEvent == null ")
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun sendNotification(triggeringGeofences: List<Geofence>) {
 
         for (triggeringGeofence in triggeringGeofences) {
