@@ -12,15 +12,15 @@ import com.udacity.project4.BuildConfig
 import com.udacity.project4.R
 import com.udacity.project4.locationreminders.ReminderDescriptionActivity
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
-
 private const val NOTIFICATION_CHANNEL_ID = BuildConfig.APPLICATION_ID + ".channel"
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun sendNotification(context: Context, reminderDataItem: ReminderDataItem) {
     val notificationManager = context
         .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-    if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID) == null
+    // We need to create a NotificationChannel associated with our CHANNEL_ID before sending a notification.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+        && notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID) == null
     ) {
         val name = context.getString(R.string.app_name)
         val channel = NotificationChannel(

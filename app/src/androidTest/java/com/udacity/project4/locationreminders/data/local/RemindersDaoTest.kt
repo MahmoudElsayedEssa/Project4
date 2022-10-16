@@ -7,7 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import org.junit.After
@@ -44,7 +44,7 @@ class RemindersDaoTest {
     fun closeDb() = database.close()
 
     @Test
-    fun testInsertRetrieveData() = runTest {
+    fun testInsertRetrieveData() = runBlockingTest {
 
         val data = ReminderDTO(
             "title",

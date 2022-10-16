@@ -41,18 +41,17 @@ class SaveReminderFragment : BaseFragment() {
     private val runningQOrLater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
     private lateinit var reminderDataItem: ReminderDataItem
 
-    private lateinit var geofencingClient: GeofencingClient
 
-    private val geofencePendingIntent: PendingIntent by lazy {
-        val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
-        intent.action = GeofenceBroadcastReceiver.ACTION_GEOFENCE_EVENT
-
-        PendingIntent.getBroadcast(
-            requireContext(),
-            0, intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-    }
+//    private val geofencePendingIntent: PendingIntent by lazy {
+//        val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
+//        intent.action = GeofenceBroadcastReceiver.ACTION_GEOFENCE_EVENT
+//
+//        PendingIntent.getBroadcast(
+//            requireContext(),
+//            0, intent,
+//            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+//        )
+//    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,8 +65,6 @@ class SaveReminderFragment : BaseFragment() {
         setDisplayHomeAsUpEnabled(true)
 
         binding.viewModel = _viewModel
-
-        geofencingClient = LocationServices.getGeofencingClient(requireActivity())
 
         return binding.root
     }
@@ -150,6 +147,7 @@ class SaveReminderFragment : BaseFragment() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun startGeoFence(reminderDataItem: ReminderDataItem) {
 
         val geofence = Geofence.Builder()
@@ -168,7 +166,18 @@ class SaveReminderFragment : BaseFragment() {
             .addGeofence(geofence)
             .build()
 
-        geofencingRequest.geofences
+
+        val intent = Intent(requireActivity(), GeofenceBroadcastReceiver::class.java)
+        //intent.action = ACTION_GEOFENCE_EVENT
+        // Use FLAG_UPDATE_CURRENT so that you get the same pending intent back when calling
+        // addGeofences() and removeGeofences().
+        val geofencePendingIntent = PendingIntent.getBroadcast(
+            requireContext(),
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
 
         //check for permission
         if (ActivityCompat.checkSelfPermission(
@@ -176,6 +185,8 @@ class SaveReminderFragment : BaseFragment() {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
+
+            val geofencingClient = LocationServices.getGeofencingClient(requireActivity())
 
             geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
 
@@ -187,6 +198,7 @@ class SaveReminderFragment : BaseFragment() {
 
                     _viewModel.saveReminder(reminderDataItem)
                     Log.e("TAG", geofence.requestId)
+                    Log.d("TAG", "addOnSuccessListener ")
                 }
 
                 addOnFailureListener {

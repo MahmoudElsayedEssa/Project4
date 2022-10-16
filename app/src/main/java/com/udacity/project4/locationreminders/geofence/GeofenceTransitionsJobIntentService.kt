@@ -8,10 +8,12 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.JobIntentService
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
+import com.udacity.project4.R
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
+import com.udacity.project4.utils.errorMessage
 import com.udacity.project4.utils.sendNotification
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
@@ -25,37 +27,31 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
 
     companion object {
         private const val JOB_ID = 573
-
-        // start the JobIntentService to handle the geofencing transition events
         fun enqueueWork(context: Context, intent: Intent) {
             enqueueWork(
-                context,
-                GeofenceTransitionsJobIntentService::class.java, JOB_ID,
-                intent
+                context, GeofenceTransitionsJobIntentService::class.java, JOB_ID, intent
             )
+            Log.i("TAG", "enqueueWork:context:$context ,,,intent:$intent ")
         }
     }
 
-    // handle the geofencing transition events and
-    // send a notification to the user when he enters the geofence area
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onHandleWork(intent: Intent) {
 
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
-        if (geofencingEvent != null) {
-            if (geofencingEvent .hasError()) {
-                return
-            }
-            if (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                if (geofencingEvent.triggeringGeofences!!.isNotEmpty()) {
-                    sendNotification(geofencingEvent.triggeringGeofences!!)
-                }
-            }
+
+        if (geofencingEvent.hasError()) {
+            Log.e("TAG", geofencingEvent.errorCode.toString())
+            return
         }
 
-        else
-            Log.i("TAG", "onHandleWork:geofencingEvent == null ")
+        if (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+            Log.v("TAG", getString(R.string.geofence_entered))
+            sendNotification(geofencingEvent.triggeringGeofences)
+        }
+
     }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun sendNotification(triggeringGeofences: List<Geofence>) {

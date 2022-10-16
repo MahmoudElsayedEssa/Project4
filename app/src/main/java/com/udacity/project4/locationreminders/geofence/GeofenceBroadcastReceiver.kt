@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.google.android.gms.location.GeofencingEvent
-import com.udacity.project4.utils.errorMessage
 
 /**
  * Triggered by the Geofence.  Since we can have many Geofences at once, we pull the request
@@ -26,18 +24,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
 
-        if (intent.action == ACTION_GEOFENCE_EVENT) {
-            val geoFenceEvent = GeofencingEvent.fromIntent(intent)
-
-            if (geoFenceEvent != null) {
-                if (geoFenceEvent.hasError()) {
-                    val errorMessage = errorMessage(context, geoFenceEvent.errorCode)
-                    Log.e("TAG", errorMessage)
-                    return
-                }
-            }
-
             GeofenceTransitionsJobIntentService.enqueueWork(context, intent)
-        }
+
     }
 }

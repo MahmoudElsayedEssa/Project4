@@ -6,13 +6,9 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.*
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -50,35 +46,38 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         binding.viewModel = _viewModel
         binding.lifecycleOwner = this
 
-        val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.map_options, menu)
-            }
+        //new way menu
+//        val menuHost: MenuHost = requireActivity()
+//        menuHost.addMenuProvider(object : MenuProvider {
+//            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+//                menuInflater.inflate(R.menu.map_options, menu)
+//            }
+//
+//            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+//                return when (menuItem.itemId) {
+//                    R.id.normal_map -> {
+//                        map.mapType = GoogleMap.MAP_TYPE_NORMAL
+//                        true
+//                    }
+//                    R.id.hybrid_map -> {
+//                        map.mapType = GoogleMap.MAP_TYPE_HYBRID
+//                        true
+//                    }
+//                    R.id.satellite_map -> {
+//                        map.mapType = GoogleMap.MAP_TYPE_SATELLITE
+//                        true
+//                    }
+//                    R.id.terrain_map -> {
+//                        map.mapType = GoogleMap.MAP_TYPE_TERRAIN
+//                        true
+//                    }
+//                    else -> false
+//                }
+//            }
+//        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    R.id.normal_map -> {
-                        map.mapType = GoogleMap.MAP_TYPE_NORMAL
-                        true
-                    }
-                    R.id.hybrid_map -> {
-                        map.mapType = GoogleMap.MAP_TYPE_HYBRID
-                        true
-                    }
-                    R.id.satellite_map -> {
-                        map.mapType = GoogleMap.MAP_TYPE_SATELLITE
-                        true
-                    }
-                    R.id.terrain_map -> {
-                        map.mapType = GoogleMap.MAP_TYPE_TERRAIN
-                        true
-                    }
-                    else -> false
-                }
-            }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
-
+        //old
+        setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -89,6 +88,31 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         }
 
         return binding.root
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.map_options, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.normal_map -> {
+            map.mapType = GoogleMap.MAP_TYPE_NORMAL
+            true
+        }
+        R.id.hybrid_map -> {
+            map.mapType = GoogleMap.MAP_TYPE_HYBRID
+            true
+        }
+        R.id.satellite_map -> {
+            map.mapType = GoogleMap.MAP_TYPE_SATELLITE
+            true
+        }
+        R.id.terrain_map -> {
+            map.mapType = GoogleMap.MAP_TYPE_TERRAIN
+            true
+        }
+        else -> super.onOptionsItemSelected(item)
     }
 
     private fun onLocationSelected() {
