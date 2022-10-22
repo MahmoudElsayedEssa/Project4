@@ -9,6 +9,7 @@ import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.locationreminders.rule.MainCoroutineRule
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
+import org.bouncycastle.util.test.SimpleTest.runTest
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import org.junit.After
@@ -17,6 +18,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.KoinComponent
+import org.koin.core.context.stopKoin
 
 import org.robolectric.annotation.Config
 
@@ -47,9 +49,14 @@ class SaveReminderViewModelTest: KoinComponent{
 
     }
 
+    @After
+    fun tearDown() {
+        stopKoin()
+    }
+
 
     @Test
-    fun shouldReturnError () = runTest  {
+    fun shouldReturnError () = runBlockingTest  {
         val result = saveReminderViewModel.validateEnteredData(createIncompleteReminderDataItem())
         MatcherAssert.assertThat(result, CoreMatchers.`is`(false))
     }
@@ -64,7 +71,7 @@ class SaveReminderViewModelTest: KoinComponent{
     }
 
     @Test
-    fun check_loading() = runTest {
+    fun check_loading() = runBlockingTest {
 
         mainCoroutineRule.pauseDispatcher()
         saveReminderViewModel.saveReminder(createFakeReminderDataItem())

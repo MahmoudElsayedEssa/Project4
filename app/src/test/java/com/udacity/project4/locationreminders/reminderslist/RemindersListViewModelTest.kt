@@ -8,17 +8,17 @@ import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.rule.MainCoroutineRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.pauseDispatcher
-import kotlinx.coroutines.test.resumeDispatcher
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.*
+import org.bouncycastle.util.test.SimpleTest.runTest
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.KoinComponent
+import org.koin.core.context.stopKoin
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
@@ -44,9 +44,13 @@ class RemindersListViewModelTest : KoinComponent {
             ApplicationProvider.getApplicationContext(), fakeReminderDataSource
         )
     }
+    @After
+    fun tearDown() {
+        stopKoin()
+    }
 
     @Test
-    fun testShouldReturnError() = runTest(UnconfinedTestDispatcher()) {
+    fun testShouldReturnError() = runBlockingTest {
         fakeReminderDataSource.setShouldReturnError(true)
         saveReminderFakeData()
         remindersViewModel.loadReminders()
@@ -57,7 +61,7 @@ class RemindersListViewModelTest : KoinComponent {
     }
 
     @Test
-    fun check_loading() = runTest(UnconfinedTestDispatcher()) {
+    fun check_loading() = runBlockingTest {
 
         mainCoroutineRule.pauseDispatcher()
 

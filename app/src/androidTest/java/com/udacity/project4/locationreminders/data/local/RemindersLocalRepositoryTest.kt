@@ -16,6 +16,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.stopKoin
 
 
 @ExperimentalCoroutinesApi
@@ -43,6 +44,10 @@ class RemindersLocalRepositoryTest {
         repository = RemindersLocalRepository(database.reminderDao())
     }
 
+    @After
+    fun tearDown() {
+        stopKoin()
+    }
     @After
     fun cleanUp() = database.close()
 

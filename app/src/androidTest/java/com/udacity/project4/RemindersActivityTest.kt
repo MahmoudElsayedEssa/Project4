@@ -118,7 +118,7 @@ class RemindersActivityTest :
         // click on select reminder location
         onView(withId(R.id.selectLocation)).perform(click())
         // click on the mapLocation
-        Thread.sleep(2000)
+        Thread.sleep(3000)
         onView(withId(R.id.map)).perform(ViewActions.longClick())
         // click on confirm button
         onView(withId(R.id.button)).perform(click())
@@ -137,13 +137,5 @@ class RemindersActivityTest :
         )
         //end scenario
         activityScenario.close()
-    }
-
-    private fun getActivity(activityScenario: ActivityScenario<RemindersActivity>): Activity {
-        lateinit var activity: Activity
-        activityScenario.onActivity {
-            activity = it
-        }
-        return activity
     }
 }

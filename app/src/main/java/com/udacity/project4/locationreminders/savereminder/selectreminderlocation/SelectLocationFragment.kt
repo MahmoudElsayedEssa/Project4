@@ -145,11 +145,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 )
             )
         }
-        Snackbar.make(
-            binding.fragmentSelectLocation, R.string.select_poi,
-            BaseTransientBottomBar.LENGTH_LONG
-        ).show()
-
         enableMyLocation()
 
     }
