@@ -13,7 +13,6 @@ import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
-import com.udacity.project4.utils.errorMessage
 import com.udacity.project4.utils.sendNotification
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
@@ -44,6 +43,7 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
             Log.e("TAG", geofencingEvent.errorCode.toString())
             return
         }
+
 
         if (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
             Log.v("TAG", getString(R.string.geofence_entered))

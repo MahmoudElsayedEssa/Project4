@@ -3,10 +3,14 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.*
-import androidx.core.app.ActivityCompat
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.findNavController
@@ -16,6 +20,9 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
+import com.udacity.project4.BuildConfig
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
@@ -29,6 +36,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
+    private lateinit var activityResultLauncher: ActivityResultLauncher<Array<String>>
 
     private lateinit var map: GoogleMap
     private var marker: Marker? = null
@@ -46,37 +54,28 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         binding.viewModel = _viewModel
         binding.lifecycleOwner = this
 
-        //new way menu
-//        val menuHost: MenuHost = requireActivity()
-//        menuHost.addMenuProvider(object : MenuProvider {
-//            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-//                menuInflater.inflate(R.menu.map_options, menu)
-//            }
-//
-//            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-//                return when (menuItem.itemId) {
-//                    R.id.normal_map -> {
-//                        map.mapType = GoogleMap.MAP_TYPE_NORMAL
-//                        true
-//                    }
-//                    R.id.hybrid_map -> {
-//                        map.mapType = GoogleMap.MAP_TYPE_HYBRID
-//                        true
-//                    }
-//                    R.id.satellite_map -> {
-//                        map.mapType = GoogleMap.MAP_TYPE_SATELLITE
-//                        true
-//                    }
-//                    R.id.terrain_map -> {
-//                        map.mapType = GoogleMap.MAP_TYPE_TERRAIN
-//                        true
-//                    }
-//                    else -> false
-//                }
-//            }
-//        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        activityResultLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+                if (result.all { r -> r.value!! }) {
+                    //granted
+                    enableMyLocation()
+                } else {
+                    //not granted
+                    Snackbar.make(
+                        binding.fragmentSelectLocation,
+                        R.string.current_location_denied_explanation,
+                        Snackbar.LENGTH_LONG
+                    ).setAction(R.string.settings) {
+                        // Displays App settings screen.
+                        startActivity(Intent().apply {
+                            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                            data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        })
+                    }.show()
+                }
+            }
 
-        //old
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
 
@@ -146,68 +145,13 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 )
             )
         }
+        Snackbar.make(
+            binding.fragmentSelectLocation, R.string.select_poi,
+            BaseTransientBottomBar.LENGTH_LONG
+        ).show()
 
-//        permissionSetup()
-        askForPermissionAndGetCurrentLocation()
+        enableMyLocation()
 
-    }
-
-    private fun askForPermissionAndGetCurrentLocation() {
-        if (ContextCompat.checkSelfPermission(
-                requireActivity(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-
-            enableMapMyLocation()
-        } else {
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_LOCATION_PERMISSION
-            )
-        }
-    }
-
-    // onRequestPermissionsResult() is deprecated and this the new way
-    //https://stackoverflow.com/questions/66551781/android-onrequestpermissionsresult-is-deprecated-are-there-any-alternatives
-//    private fun permissionSetup() {
-//        val permission = ContextCompat.checkSelfPermission(
-//            requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
-//        )
-//
-//        if (permission != PackageManager.PERMISSION_GRANTED) {
-//            permissionsResultCallback.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-//        } else {
-//            println("Permission isGranted")
-//        }
-//    }
-//
-//    private val permissionsResultCallback = registerForActivityResult(
-//        ActivityResultContracts.RequestPermission()
-//    ) {
-//        when (it) {
-//            true -> {
-//                println("Permission has been granted by user")
-//                enableMapMyLocation()
-//            }
-//            false -> {
-//                _viewModel.showSnackBarInt.value = R.string.permission_denied_explanation
-//            }
-//        }
-//    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        if (requestCode == REQUEST_LOCATION_PERMISSION) {
-            if (grantResults.isNotEmpty() && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                enableMapMyLocation()
-            }
-        }
     }
 
 
@@ -236,6 +180,43 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         map.isMyLocationEnabled = true
         addLastLocationCallback()
     }
+
+    private fun enableMyLocation() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+                requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+
+                //permission granted
+                enableMapMyLocation()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                Snackbar.make(
+                    binding.fragmentSelectLocation,
+                    R.string.current_location_denied_explanation,
+                    Snackbar.LENGTH_INDEFINITE
+                ).setAction(R.string.settings) {
+                    // Displays App settings screen.
+                    startActivity(Intent().apply {
+                        action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    })
+                }.show()
+            }
+            else -> {
+                activityResultLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+        }
+    }
+
 
     @SuppressLint("MissingPermission")
     private fun addLastLocationCallback() {
